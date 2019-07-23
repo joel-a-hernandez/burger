@@ -1,19 +1,83 @@
-
-<div class="row">
-  <div class="col s6">
-    <div class="card-panel amber darken-1">
-      <h4 class="teal-text text-darken-4 flow-text">Burgers That Are Not Eaten</h4>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12" style="color:seashell; display:flex; justify-content:center; background-color:blue; padding:20px; margin-bottom: 1rem">
+          <h1>Eat That Burger</h1>
+        {{!-- this will have a pic and some header --}}
     </div>
-    <ul class="collection">
-      {{#each burgers}} {{#unless devoured}} {{> burgers/burger-block devoured=false}} {{/unless}} {{/each}}
-    </ul>
   </div>
-  <div class="col s6">
-    <div class="card-panel amber darken-1">
-      <h4 class="teal-text text-darken-4 flow-text">Burgers That Are Eaten</h4>
+  <div class="row">
+    <div class="col-md-6" style="text-align:center; justify-content:center; border: 1px solid black">
+      <h2>Choose your burger!</h2>
+      <ul>
+        {{#each burgers}}
+          {{#unless this.devoured}}
+            <div><button class="burgName" disabled="true" style="width: 200px; height: 40px; margin: 10px; background-color:blue; color:lightgray">{{this.burger}}</button>
+              <button class="devour" data-id="{{this.id}}" data-devoured="false">Devour it!</button>
+            </div>
+          {{/unless}}
+        {{/each}}
+      </ul>
     </div>
-    <ul class="collection">
-      {{#each burgers}} {{#if devoured}} {{> burgers/burger-block devoured=true}} {{/if}} {{/each}}
-    </ul>
+    <div class="col-md-6" style="text-align:center; justify-content:center; border: 1px solid black">
+      <h2>Burgers Devoured!</h2>
+      <ul>
+        {{#each burgers}}
+          {{#if this.devoured}}
+            <div><button class="burgName" disabled="true" style="width: 200px; height: 40px; margin: 10px">{{this.burger}}</div>
+          {{/if}}
+        {{/each}}
+      </ul>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-6" style="text-align:right; justify-content:center; border: 1px solid black">
+      <h2 style="position: relative; top:15px">Add a Burger: </h2>
+    </div>
+    <div class="col-md-6" style="text-align:left; justify-content:center; border: 1px solid black">
+      <form class="create-form">
+        <div class="form-group">
+          <label for="burgerName" style="position: relative; top:5px"><strong>Burger Name:</strong></label>
+          <input id="burger" type="text" name="burgerName" placeholder="Enter a burger name" style="position: relative; top:5px"><br>
+        </div>
+        <button type="submit" style="position: relative; top:-10px; width: 300px">Add Burger</button>
+      </form>
+    </div>
   </div>
 </div>
+<script>
+{{!-- creates a new burger --}}
+$(".create-form").on("submit", function(event) {
+  // Make sure to preventDefault on a submit event.
+  event.preventDefault();
+  if($("#burger").val().trim() === "")
+  {
+    alert("Burger name cannot be empty.");
+    return;
+  }
+  var newBurger = {
+  name: $("#burger").val().trim()
+};
+// Send the POST request.
+$.ajax("/api/burger", {
+  type: "POST",
+  data: newBurger
+  }).then(
+  function() {
+    // Reload the page to get the updated list
+    location.reload();
+  });
+});
+{{!-- devours a created burger --}}
+$(".devour").on("click", function(event) {
+  var id = $(this).data("id");
+  // Send the DELETE request.
+  $.ajax("/api/burger/" + id, {
+    type: "PUT"
+  }).then(
+    function() {
+      // Reload the page to get the updated list
+      location.reload();
+    }
+  );
+});
+</script>
